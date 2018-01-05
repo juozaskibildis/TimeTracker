@@ -7,13 +7,14 @@
 
 using namespace std;
 
-// TODO: solve segmentation fault which is caused in main
 // TODO: consider folder
 
 // Global Variables
 //-------------------------
-string task;
+string task = "";
 string logFileName = "log"; 		// possible issue when task and journal filenames are the same
+string folder = "track/";
+int remainingMinutes = 0; 		// consider different solution to minutes
 
 // Time
 //-------------------------
@@ -80,7 +81,7 @@ int getMinutes 					// calculates difference in minutes
 			hourStop += 24;
 			dayStop--;
 		}
-		for(int i = 0; i < hourStart - hourStop; i++) 	// convert hours into minutes
+		for(int i = 0; i < hourStop - hourStart; i++) 	// convert hours into minutes
 		{
 			sum += 60;
 		}
@@ -111,6 +112,20 @@ int getMinutes 					// calculates difference in minutes
 	return sum;	
 }
 
+int getHours(int minutes) 					// returns amount of hours in a given number of minutes
+{
+	int hours = 0;
+
+	while(minutes >= 60)
+	{
+		minutes -= 60;
+		hours++;
+	}
+	remainingMinutes = minutes;	
+	return hours;
+}
+
+
 // Text
 //-------------------------
 
@@ -137,21 +152,14 @@ void printTaskInfo()
 	int minute;
 
 	// get contents
-	ifile >> year >> month >> day >> hour >> minute;
+	ifile >> year >> day >> hour >> minute;
 	ifile.close();
 
-	// TODO
-	// print them
-	// printTime(year, month, day, hour, minute);
-	// printTime();
-	// 
-	// time_t currentTime = getTime();
-	// struct tm * timeStruct = localtime(&currentTime);
-	//
-	//
-	// cout << getHours(getTime(), year, month, day, hour) << " hours " << "" << " minutes spent" << endl;
-	// consider doing all the calculations only with minutes and then converting them into hours
-	//
+	 printTime(year, day, hour, minute);
+	 printTime();
+
+	 cout << getHours(getMinutes(getTime(), year, day, hour, minute)) << " hours " << remainingMinutes << " minutes spent" << endl;
+	
 }
 
 // Files
@@ -160,7 +168,7 @@ void printTaskInfo()
 bool fileExists() 					// task file
 {
 	ifstream ifile(task);
-	if(!ifile) 					// not sure about this
+	if(!ifile) 					
 	{
 		return false;
 	}
@@ -263,7 +271,6 @@ int main
 	)
 
 {
-	task = ""; 					// initialize variables
 	string command = "";
 
 	switch(argc)
@@ -271,11 +278,13 @@ int main
 		case(1): 				// if there is a single argument
 		{
 			help();
+			break;
 		}
 		case(2):
 		{
 			task = argv[1]; 		// set the first argument as a task
 			start();
+			break;
 		}
 		default:
 		{
@@ -285,6 +294,7 @@ int main
 			{
 				stop();
 			}
+			break;
 		}
 	}
 	return 0;
