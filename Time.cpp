@@ -4,17 +4,20 @@
 #include <ctime>
 #include <sstream>
 #include <string>
+#include <stdio.h>
 
 using namespace std;
 
-// TODO: consider folder
+// TODO: folder
+// TODO: log
+
 
 // Global Variables
 //-------------------------
 string task = "";
 string logFileName = "log"; 		// possible issue when task and journal filenames are the same
 string folder = "track/";
-int remainingMinutes = 0; 		// consider different solution to minutes
+int remainingMinutes = 0; 		// remaining minutes after conversion to hours
 
 // Time
 //-------------------------
@@ -46,7 +49,7 @@ void printTime()
 // Calculations
 //-------------------------
 
-int getMinutes 					// calculates difference in minutes
+int getMinutes 	 					// calculates difference in minutes
 	( 	
  	time_t time,
 	int yearStart,
@@ -121,7 +124,7 @@ int getHours(int minutes) 					// returns amount of hours in a given number of m
 		minutes -= 60;
 		hours++;
 	}
-	remainingMinutes = minutes;	
+	remainingMinutes = minutes; 				// returns remaining minutes into global variable	
 	return hours;
 }
 
@@ -131,6 +134,7 @@ int getHours(int minutes) 					// returns amount of hours in a given number of m
 
 void help()
 {
+	// TODO: make help clearer
 	cout << endl;
 	cout << "Usage:" << endl;
 	cout << "track [task]" << endl;
@@ -155,11 +159,10 @@ void printTaskInfo()
 	ifile >> year >> day >> hour >> minute;
 	ifile.close();
 
-	 printTime(year, day, hour, minute);
-	 printTime();
+	printTime(year, day, hour, minute);
+	printTime();
 
-	 cout << getHours(getMinutes(getTime(), year, day, hour, minute)) << " hours " << remainingMinutes << " minutes spent" << endl;
-	
+	cout << getHours(getMinutes(getTime(), year, day, hour, minute)) << " hours " << remainingMinutes << " minutes spent" << endl;
 }
 
 // Files
@@ -167,7 +170,7 @@ void printTaskInfo()
 
 bool fileExists() 					// task file
 {
-	ifstream ifile(task);
+	ifstream ifile(task.c_str());
 	if(!ifile) 					
 	{
 		return false;
@@ -178,7 +181,7 @@ bool fileExists() 					// task file
 
 int getNumberOfLines() 					// in log file
 {
-	ifstream ifile(logFileName);
+	ifstream ifile(logFileName.c_str());
 	int lines = 0;
 	string tmp;
 	
@@ -191,27 +194,43 @@ int getNumberOfLines() 					// in log file
 	return lines;
 }
 
-void log
- 	(
-	int year,
-	int day,
-	int hour,
-	int minute
-	)
+void log()
 {
-	ofstream ofile(logFileName);
+	// TODO: rewrite file contents every time
+	// consider making list of every task run and total time spent on them
+	// consider printing date every day, possible issue if task is ongoing after midnight
+	
+	ofstream ofile(logFileName.c_str());
 	int lines = getNumberOfLines();
 	int minutes;
 
 	ofile.seekp(0, ios_base::end);  		// set cursor at the end of the file
 	ofile << endl;	
 
+	ifstream ifile(task);
+
+	int year;
+	int month;
+	int day;
+	int hour;
+	int minute;
+
+	ifile >> year >> day >> hour >> minute;
+	ifile.close();
+
 	minutes = getMinutes(getTime(), year, day, hour, minute);
 
-	// ofile << task << " " << getHours() << " " << minutes << endl;
-	// there is a possibility of too many hours 
+	ofile << task << " " << getHours(minutes) << " " << remainingMinutes << endl;
 	
 	ofile.close();
+}
+
+void removeFile()
+{
+	if(remove(task.c_str()) != 0 )
+	{
+    		cout << "Couldn`t remove task file" << endl;
+	}	
 }
 
 void createTaskFile()
@@ -219,7 +238,7 @@ void createTaskFile()
 	time_t currentTime = time(0);
 	struct tm * timeStruct = localtime(&currentTime);
 
-	ofstream ofile(task);
+	ofstream ofile(task.c_str());
 	ofile << timeStruct->tm_year + 1900 << " "
 	<< timeStruct->tm_yday << " "
 	<< timeStruct->tm_hour << " "
@@ -251,8 +270,9 @@ void stop()
 	{
 		cout << "Task finished" << endl;
 		printTaskInfo();
-		// log();
-		// delete file
+
+		log();
+		removeFile();
 	}
 	else
 	{
