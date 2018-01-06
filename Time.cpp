@@ -2,24 +2,19 @@
 #include <iomanip>
 #include <fstream>
 #include <ctime>
-#include <sstream>
 #include <string>
 #include <stdio.h>
 
 using namespace std;
 
-// TODO: folder
-// TODO: consider month
 // TODO: make help clearer
-// TODO: create session command
-
 
 // Global Variables
 //-------------------------
 string task = "";
-string folder = "track/";
-string logFileName = "log.txt"; 		// possible issue when task and journal filenames are the same
-int remainingMinutes = 0; 				// remaining minutes after conversion to hours
+string taskFile = "";
+string logFileName = "log.txt"; 	 			
+int remainingMinutes = 0; 					// remaining minutes after conversion to hours
 
 // Time
 //-------------------------
@@ -52,7 +47,7 @@ void printTime()
 // Calculations
 //-------------------------
 
-int getMinutes 	 					// calculates difference in minutes
+int getMinutes 	 						// calculates difference in minutes
 	( 	
  	time_t time,
 	int yearStart,
@@ -102,7 +97,7 @@ int getMinutes 	 					// calculates difference in minutes
 		}
 		for(int i = 0; i < dayStop - dayStart; i++)
 		{
-			sum += 24*60; 				// 24 hours in a day 60 minutes in an hour
+			sum += 24 * 60; 			// 24 hours in a day 60 minutes in an hour
 		}
 	}
 
@@ -111,14 +106,17 @@ int getMinutes 	 					// calculates difference in minutes
 	{
 		for(int i = 0; i < yearStop - yearStart; i++)
 		{
-			sum += 365*24*60;
+			sum += 365 * 24 * 60;
 		}
 	}
 
 	return sum;	
 }
 
-int getHours(int minutes) 					// returns amount of hours in a given number of minutes
+int getHours
+	(
+	int minutes
+ 	) 							// returns amount of hours in a given number of minutes
 {
 	int hours = 0;
 
@@ -137,20 +135,18 @@ int getHours(int minutes) 					// returns amount of hours in a given number of m
 
 void help()
 {
-	// TODO: make help clearer
-	cout << endl;
 	cout << "Usage:" << endl;
-	cout << "track [task]" << endl;
-	cout << ">> This command starts tracking or displays status" << endl;
+	cout << "track [task]" << endl; 			// implying that the name of the program is going to be track
+	cout << "To start tracking or print info." << endl;
+	cout << "Creates a task file with current time." << endl;
 	cout << endl;
 	cout << "track [task] stop" << endl;
-	cout << ">> This command stops tracking and logs results" << endl;
-	cout << endl;
+	cout << "Stops tracking and writes time spent into a log file." << endl;
 }
 
 void printTaskInfo()
 {
-	ifstream ifile(task);
+	ifstream ifile(taskFile.c_str());
 
 	int year;
 	int month;
@@ -165,8 +161,8 @@ void printTaskInfo()
 	printTime(year, day, hour, minute);
 	printTime();
 
-	cout/* << setw(2) << setfill('0')*/ << getHours(getMinutes(getTime(), year, day, hour, minute)) << " hours "
-	<</* setw(2) << setfill('0') <<*/ remainingMinutes << " minutes spent" << endl;
+	cout << getHours(getMinutes(getTime(), year, day, hour, minute)) << " hours "
+	<< remainingMinutes << " minutes spent." << endl;
 }
 
 // Files
@@ -174,7 +170,7 @@ void printTaskInfo()
 
 bool fileExists() 					// task file
 {
-	ifstream ifile(task.c_str());
+	ifstream ifile(taskFile.c_str());
 	if(!ifile) 					
 	{
 		return false;
@@ -190,7 +186,7 @@ int getNumberOfLines() 					// in a log file
 	string tmp;
 	
 	// there should be three variables per line
-	while(ifile >> tmp >> tmp >> tmp) 		// this possibly loops every three lines
+	while(ifile >> tmp >> tmp >> tmp) 
 	{
 		lines++;
 	}
@@ -198,7 +194,10 @@ int getNumberOfLines() 					// in a log file
 	return lines;
 }
 
-void append(int minutes)
+void append
+	(
+ 	int minutes
+ 	)
 {
 	int lines = getNumberOfLines();
 
@@ -238,7 +237,7 @@ void log()
 
 	int minutes;
 
-	ifstream ifile(task);
+	ifstream ifile(taskFile.c_str());
 
 	int year;
 	int month;
@@ -256,9 +255,9 @@ void log()
 
 void removeFile()
 {
-	if(remove(task.c_str()) != 0 )
+	if(remove(taskFile.c_str()) != 0 )
 	{
-    		cout << "Couldn`t remove task file" << endl;
+    		cout << "Couldn`t remove task file." << endl;
 	}	
 }
 
@@ -267,7 +266,7 @@ void createTaskFile()
 	time_t currentTime = time(0);
 	struct tm * timeStruct = localtime(&currentTime);
 
-	ofstream ofile(task.c_str());
+	ofstream ofile(taskFile.c_str());
 	ofile << timeStruct->tm_year + 1900 << " "
 	<< timeStruct->tm_yday << " "
 	<< timeStruct->tm_hour << " "
@@ -284,12 +283,12 @@ void start()
 {
 	if(fileExists() == true)
 	{
-		cout << "Ongoing" << endl;
+		cout << "Ongoing." << endl;
 		printTaskInfo();
 	}
 	else
 	{
-		cout << "Started" << endl;
+		cout << "Started." << endl;
 		createTaskFile();
 		printTime();
 	}
@@ -299,7 +298,7 @@ void stop()
 {
 	if(fileExists() == true)
 	{
-		cout << "Task finished" << endl;
+		cout << "Finished." << endl;
 		printTaskInfo();
 
 		log();
@@ -307,7 +306,7 @@ void stop()
 	}
 	else
 	{
-		cout << "This task wasn`t started" << endl;
+		cout << "This task wasn`t started." << endl;
 	}
 }
 
@@ -317,7 +316,7 @@ void stop()
 
 int main
 	(
- 	int argc, 				// argc argv
+ 	int argc, 
        	char* argv[]
 	)
 
@@ -326,7 +325,7 @@ int main
 
 	switch(argc)
 	{
-		case(1): 				// if there is a single argument
+		case(1): 
 		{
 			help();
 			break;
@@ -334,12 +333,21 @@ int main
 		case(2):
 		{
 			task = argv[1]; 		// set the first argument as a task
-			start();
+			taskFile = task + ".txt";
+			if(task != "log")
+			{
+				start();
+			}
+			else
+			{
+				cout << "Use different name to not overwrite the log file." << endl;
+			}
 			break;
 		}
 		default:
 		{
 			task = argv[1];
+			taskFile = task + ".txt";
 			command = argv[2]; 		// set the second argument as a command	
 			if(command == "stop")
 			{
