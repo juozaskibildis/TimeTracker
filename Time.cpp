@@ -15,7 +15,7 @@ using namespace std;
 // Global Variables
 //-------------------------
 string task = "";
-string logFileName = "log"; 		// possible issue when task and journal filenames are the same
+string logFileName = "log.txt"; 		// possible issue when task and journal filenames are the same
 string folder = "track/";
 int remainingMinutes = 0; 		// remaining minutes after conversion to hours
 
@@ -184,14 +184,51 @@ int getNumberOfLines() 					// in log file
 	ifstream ifile(logFileName.c_str());
 	int lines = 0;
 	string tmp;
+	int tmpi;
 	
 	// there should be three variables per line
-	while(ifile >> tmp >> tmp >> tmp) 		// this possibly loops every three lines
+	while(ifile >> tmp >> tmpi >> tmpi) 		// this possibly loops every three lines
 	{
 		lines++;
 	}
 	ifile.close();
 	return lines;
+}
+
+void append(int minutes)
+{
+	int lines = getNumberOfLines();
+	
+	// rewrite existing content
+	// rename everything so it makes more sense
+
+	string taskRe[lines];
+	int hourRe[lines];
+	int minuteRe[lines];
+
+	ifstream readLog(logFileName.c_str());
+
+	// read contents
+	for(int i = 0; i < lines; i++)
+	{
+		readLog >> taskRe[i] >> hourRe[i] >> minuteRe[i];	
+	}
+
+	readLog.close();
+	
+	// write contents
+
+	ofstream ofile(logFileName.c_str());
+
+	for(int i = 0; i < lines; i++)
+	{
+		ofile << taskRe[i] << " " << hourRe[i] << " " << minuteRe[i] << '\n';
+	}
+
+	ofile << task << " " << getHours(minutes) << " " << remainingMinutes << '\n';
+	ofile << endl;
+	
+	ofile.close();
 }
 
 void log()
@@ -200,12 +237,7 @@ void log()
 	// consider making list of every task run and total time spent on them
 	// consider printing date every day, possible issue if task is ongoing after midnight
 	
-	ofstream ofile(logFileName.c_str());
-	int lines = getNumberOfLines();
 	int minutes;
-
-	ofile.seekp(0, ios_base::end);  		// set cursor at the end of the file
-	ofile << endl;	
 
 	ifstream ifile(task);
 
@@ -220,9 +252,7 @@ void log()
 
 	minutes = getMinutes(getTime(), year, day, hour, minute);
 
-	ofile << task << " " << getHours(minutes) << " " << remainingMinutes << endl;
-	
-	ofile.close();
+	append(minutes);
 }
 
 void removeFile()
