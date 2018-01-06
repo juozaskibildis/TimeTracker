@@ -9,15 +9,17 @@
 using namespace std;
 
 // TODO: folder
-// TODO: log
+// TODO: consider month
+// TODO: make help clearer
+// TODO: create session command
 
 
 // Global Variables
 //-------------------------
 string task = "";
-string logFileName = "log.txt"; 		// possible issue when task and journal filenames are the same
 string folder = "track/";
-int remainingMinutes = 0; 		// remaining minutes after conversion to hours
+string logFileName = "log.txt"; 		// possible issue when task and journal filenames are the same
+int remainingMinutes = 0; 				// remaining minutes after conversion to hours
 
 // Time
 //-------------------------
@@ -30,7 +32,8 @@ time_t getTime()
 
 void printTime(int year, int day, int hour, int minute)
 {
-	cout << year << " day " << day << " " << hour << ":" << minute << endl;
+	cout << year << " day " << day << " "
+	<< setw(2) << setfill('0') << hour << ":" << setw(2) << setfill('0') << minute << endl;
 }
 
 void printTime()
@@ -162,7 +165,8 @@ void printTaskInfo()
 	printTime(year, day, hour, minute);
 	printTime();
 
-	cout << getHours(getMinutes(getTime(), year, day, hour, minute)) << " hours " << remainingMinutes << " minutes spent" << endl;
+	cout/* << setw(2) << setfill('0')*/ << getHours(getMinutes(getTime(), year, day, hour, minute)) << " hours "
+	<</* setw(2) << setfill('0') <<*/ remainingMinutes << " minutes spent" << endl;
 }
 
 // Files
@@ -179,15 +183,14 @@ bool fileExists() 					// task file
 	return true;
 }
 
-int getNumberOfLines() 					// in log file
+int getNumberOfLines() 					// in a log file
 {
 	ifstream ifile(logFileName.c_str());
 	int lines = 0;
 	string tmp;
-	int tmpi;
 	
 	// there should be three variables per line
-	while(ifile >> tmp >> tmpi >> tmpi) 		// this possibly loops every three lines
+	while(ifile >> tmp >> tmp >> tmp) 		// this possibly loops every three lines
 	{
 		lines++;
 	}
@@ -198,17 +201,14 @@ int getNumberOfLines() 					// in log file
 void append(int minutes)
 {
 	int lines = getNumberOfLines();
-	
-	// rewrite existing content
-	// rename everything so it makes more sense
 
-	string taskRe[lines];
+	string taskRe[lines]; 				// used for rewriting
 	int hourRe[lines];
 	int minuteRe[lines];
 
+	// read contents
 	ifstream readLog(logFileName.c_str());
 
-	// read contents
 	for(int i = 0; i < lines; i++)
 	{
 		readLog >> taskRe[i] >> hourRe[i] >> minuteRe[i];	
@@ -217,26 +217,25 @@ void append(int minutes)
 	readLog.close();
 	
 	// write contents
-
-	ofstream ofile(logFileName.c_str());
+	ofstream writeLog(logFileName.c_str());
 
 	for(int i = 0; i < lines; i++)
 	{
-		ofile << taskRe[i] << " " << hourRe[i] << " " << minuteRe[i] << '\n';
+		writeLog << taskRe[i] << " " << hourRe[i] << " " << minuteRe[i] << '\n';
 	}
 
-	ofile << task << " " << getHours(minutes) << " " << remainingMinutes << '\n';
-	ofile << endl;
+	writeLog << task << " " << getHours(minutes) << " " << remainingMinutes << '\n';
+	writeLog << endl;
 	
-	ofile.close();
+	writeLog.close();
 }
 
 void log()
 {
-	// TODO: rewrite file contents every time
 	// consider making list of every task run and total time spent on them
 	// consider printing date every day, possible issue if task is ongoing after midnight
-	
+	// consider making command to add a separator
+
 	int minutes;
 
 	ifstream ifile(task);
@@ -278,6 +277,8 @@ void createTaskFile()
 
 // Commands
 //-------------------------
+
+// consider making a new command to separate days or sessions
 
 void start()
 {
