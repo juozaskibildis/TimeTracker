@@ -7,10 +7,9 @@
 
 using namespace std;
 
-// TODO: make help clearer
-
 // Global Variables
 //-------------------------
+
 string task = "";
 string taskFile = "";
 string logFileName = "log.txt"; 	 			
@@ -36,12 +35,12 @@ void printTime()
 	time_t currentTime = getTime();
 	struct tm * timeStruct = localtime(&currentTime);
 	printTime
-	(
+		(
 	 	timeStruct->tm_year + 1900,
 		timeStruct->tm_yday,
 		timeStruct->tm_hour,
 		timeStruct->tm_min
-	);
+		);
 }
 
 // Calculations
@@ -77,7 +76,7 @@ int getMinutes 	 						// calculates difference in minutes
 
 	if(hourStop != hourStart)
 	{
-		if(hourStop < hourStart) 			// if past midnight
+		if(hourStop < hourStart) 
 		{
 			hourStop += 24;
 			dayStop--;
@@ -154,8 +153,7 @@ void printTaskInfo()
 	int hour;
 	int minute;
 
-	// get contents
-	ifile >> year >> day >> hour >> minute;
+	ifile >> year >> day >> hour >> minute; 		// get content
 	ifile.close();
 
 	printTime(year, day, hour, minute);
@@ -168,7 +166,7 @@ void printTaskInfo()
 // Files
 //-------------------------
 
-bool fileExists() 					// task file
+bool fileExists() 						// task file
 {
 	ifstream ifile(taskFile.c_str());
 	if(!ifile) 					
@@ -179,14 +177,13 @@ bool fileExists() 					// task file
 	return true;
 }
 
-int getNumberOfLines() 					// in a log file
+int getNumberOfLines() 						// in a log file
 {
 	ifstream ifile(logFileName.c_str());
 	int lines = 0;
 	string tmp;
 	
-	// there should be three variables per line
-	while(ifile >> tmp >> tmp >> tmp) 
+	while(ifile >> tmp >> tmp >> tmp) 			// there should be three variables per line 
 	{
 		lines++;
 	}
@@ -201,41 +198,35 @@ void append
 {
 	int lines = getNumberOfLines();
 
-	string taskRe[lines]; 				// used for rewriting
+	string taskRe[lines]; 					// used for rewriting
 	int hourRe[lines];
 	int minuteRe[lines];
 
-	// read contents
-	ifstream readLog(logFileName.c_str());
+	ifstream readLog(logFileName.c_str()); 
 
-	for(int i = 0; i < lines; i++)
+	for(int i = 0; i < lines; i++) 				// read file content
 	{
 		readLog >> taskRe[i] >> hourRe[i] >> minuteRe[i];	
 	}
 
 	readLog.close();
 	
-	// write contents
 	ofstream writeLog(logFileName.c_str());
 
-	for(int i = 0; i < lines; i++)
+	for(int i = 0; i < lines; i++) 				// rewrite file content
 	{
 		writeLog << taskRe[i] << " " << hourRe[i] << " " << minuteRe[i] << '\n';
 	}
 
 	writeLog << task << " " << getHours(minutes) << " " << remainingMinutes << '\n';
-	writeLog << endl;
+	writeLog << endl; 					// append current task info
 	
 	writeLog.close();
 }
 
 void log()
 {
-	// consider making list of every task run and total time spent on them
-	// consider printing date every day, possible issue if task is ongoing after midnight
-	// consider making command to add a separator
-
-	int minutes;
+	int minutes; 						// time spent in minutes
 
 	ifstream ifile(taskFile.c_str());
 
@@ -243,7 +234,7 @@ void log()
 	int month;
 	int day;
 	int hour;
-	int minute;
+	int minute; 						// for reading file content
 
 	ifile >> year >> day >> hour >> minute;
 	ifile.close();
@@ -276,8 +267,6 @@ void createTaskFile()
 
 // Commands
 //-------------------------
-
-// consider making a new command to separate days or sessions
 
 void start()
 {
@@ -332,7 +321,7 @@ int main
 		}
 		case(2):
 		{
-			task = argv[1]; 		// set the first argument as a task
+			task = argv[1]; 			// set the first argument as a task
 			taskFile = task + ".txt";
 			if(task != "log")
 			{
@@ -348,7 +337,7 @@ int main
 		{
 			task = argv[1];
 			taskFile = task + ".txt";
-			command = argv[2]; 		// set the second argument as a command	
+			command = argv[2]; 			// set the second argument as a command	
 			if(command == "stop")
 			{
 				stop();
