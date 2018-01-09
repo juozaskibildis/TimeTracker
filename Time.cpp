@@ -139,10 +139,9 @@ int getHours
 
 void help(string programName)
 {
-	cout << "Usage:" << endl;
 	cout << programName << " [task]" << endl; 
 	cout << "Starts tracking." << endl;
-	cout << "Run again to stop." << endl;
+	cout << "Run again to stop and write time spent into '" << logFileName << "'." << endl;
 	cout << "If given more arguments prints info instead of stopping." << endl;
 }
 
