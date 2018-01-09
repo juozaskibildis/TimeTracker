@@ -15,6 +15,11 @@ string taskFile = "";
 string logFileName = "log.txt"; 	 			
 int remainingMinutes = 0; 					// remaining minutes after conversion to hours
 
+//-------------------------
+void start();
+void stop();
+void printTaskInfo();
+
 // Time
 //-------------------------
 
@@ -132,35 +137,13 @@ int getHours
 // Text
 //-------------------------
 
-void help()
+void help(string programName)
 {
 	cout << "Usage:" << endl;
-	cout << "track [task]" << endl; 			// implying that the name of the program is going to be track
-	cout << "To start tracking or print info." << endl;
-	cout << "Creates a task file with current time." << endl;
-	cout << endl;
-	cout << "track [task] stop" << endl;
-	cout << "Stops tracking and writes time spent into a log file." << endl;
-}
-
-void printTaskInfo()
-{
-	ifstream ifile(taskFile.c_str());
-
-	int year;
-	int month;
-	int day;
-	int hour;
-	int minute;
-
-	ifile >> year >> day >> hour >> minute; 		// get content
-	ifile.close();
-
-	printTime(year, day, hour, minute);
-	printTime();
-
-	cout << getHours(getMinutes(getTime(), year, day, hour, minute)) << " hours "
-	<< remainingMinutes << " minutes spent." << endl;
+	cout << programName << " [task]" << endl; 
+	cout << "Starts tracking." << endl;
+	cout << "Run again to stop." << endl;
+	cout << "If given more arguments prints info instead of stopping." << endl;
 }
 
 // Files
@@ -272,8 +255,7 @@ void start()
 {
 	if(fileExists() == true)
 	{
-		cout << "Ongoing." << endl;
-		printTaskInfo();
+		stop();
 	}
 	else
 	{
@@ -283,22 +265,40 @@ void start()
 	}
 }
 
-void stop()
+void printTaskInfo()
 {
-	if(fileExists() == true)
+	if(fileExists())
 	{
-		cout << "Finished." << endl;
-		printTaskInfo();
+		ifstream ifile(taskFile.c_str());
 
-		log();
-		removeFile();
+		int year;
+		int month;
+		int day;
+		int hour;
+		int minute;
+
+		ifile >> year >> day >> hour >> minute; 		// get content
+		ifile.close();
+
+		printTime(year, day, hour, minute);
+		printTime();
+
+		cout << getHours(getMinutes(getTime(), year, day, hour, minute)) << " hours "
+		<< remainingMinutes << " minutes spent." << endl;
 	}
 	else
 	{
-		cout << "This task wasn`t started." << endl;
+		start();
 	}
 }
 
+void stop()
+{
+	cout << "Finished." << endl;
+	printTaskInfo();
+	log();
+	removeFile();
+}
 
 // Main
 //-------------------------
@@ -316,7 +316,7 @@ int main
 	{
 		case(1): 
 		{
-			help();
+			help(argv[0]);
 			break;
 		}
 		case(2):
@@ -336,12 +336,8 @@ int main
 		default:
 		{
 			task = argv[1];
-			taskFile = task + ".txt";
-			command = argv[2]; 			// set the second argument as a command	
-			if(command == "stop")
-			{
-				stop();
-			}
+			taskFile = task + ".txt";	
+			printTaskInfo();
 			break;
 		}
 	}
